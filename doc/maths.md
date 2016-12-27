@@ -74,7 +74,7 @@ Examples:
  1
  0
  0
-[torch.Tensor of dimension 5]
+[torch.DoubleTensor of size 5]
 
 > torch.cat(torch.ones(3, 2), torch.zeros(2, 2), 1)
  1  1
@@ -82,19 +82,19 @@ Examples:
  1  1
  0  0
  0  0
-[torch.DoubleTensor of dimension 5x2]
+[torch.DoubleTensor of size 5x2]
 
 > torch.cat(torch.ones(2, 2), torch.zeros(2, 2), 1)
  1  1
  1  1
  0  0
  0  0
-[torch.DoubleTensor of dimension 4x2]
+[torch.DoubleTensor of size 4x2]
 
 > torch.cat(torch.ones(2, 2), torch.zeros(2, 2), 2)
  1  1  0  0
  1  1  0  0
-[torch.DoubleTensor of dimension 2x4]
+[torch.DoubleTensor of size 2x4]
 
 > torch.cat(torch.cat(torch.ones(2, 2), torch.zeros(2, 2), 1), torch.rand(3, 2), 1)
  1.0000  1.0000
@@ -104,7 +104,7 @@ Examples:
  0.3227  0.0493
  0.9161  0.1086
  0.2206  0.7449
-[torch.DoubleTensor of dimension 7x2]
+[torch.DoubleTensor of size 7x2]
 
 > torch.cat({torch.ones(2, 2), torch.zeros(2, 2), torch.rand(3, 2)}, 1)
  1.0000  1.0000
@@ -114,7 +114,7 @@ Examples:
  0.3227  0.0493
  0.9161  0.1086
  0.2206  0.7449
-[torch.DoubleTensor of dimension 7x2]
+[torch.DoubleTensor of size 7x2]
 
 ```
 
@@ -222,7 +222,7 @@ For more than `4` dimensions, you can use a storage as argument: `y = torch.ones
 
 
 <a name="torch.rand"></a>
-### [res] torch.rand([res,] m [,n...]) ###
+### [res] torch.rand([res,] [gen,] m [,n...]) ###
 <a name="torch.rand"></a>
 
 `y = torch.rand(n)` returns a one-dimensional `Tensor` of size `n` filled with random numbers from a uniform distribution on the interval `[0, 1)`.
@@ -231,9 +231,10 @@ For more than `4` dimensions, you can use a storage as argument: `y = torch.ones
 
 For more than 4 dimensions, you can use a storage as argument: `y = torch.rand(torch.LongStorage{m, n, k, l, o})`.
 
+`y = torch.rand(gen, m, n)` returns a `m × n` `Tensor` of random numbers from a uniform distribution on the interval `[0, 1)`, using a non-global random number generator `gen` created by [torch.Generator()](random.md#torch.Generator).
 
 <a name="torch.randn"></a>
-### [res] torch.randn([res,] m [,n...]) ###
+### [res] torch.randn([res,] [gen,] m [,n...]) ###
 <a name="torch.randn"></a>
 
 `y = torch.randn(n)` returns a one-dimensional `Tensor` of size `n` filled with random numbers from a normal distribution with mean zero and variance one.
@@ -242,6 +243,7 @@ For more than 4 dimensions, you can use a storage as argument: `y = torch.rand(t
 
 For more than 4 dimensions, you can use a storage as argument: `y = torch.randn(torch.LongStorage{m, n, k, l, o})`.
 
+`y = torch.randn(gen, m, n)` returns a `m × n` `Tensor` of random numbers from a normal distribution with mean zero and variance one, using a non-global random number generator `gen` created by [torch.Generator()](random.md#torch.Generator).
 
 <a name="torch.range"></a>
 ### [res] torch.range([res,] x, y [,step]) ###
@@ -255,22 +257,23 @@ For more than 4 dimensions, you can use a storage as argument: `y = torch.randn(
  3
  4
  5
-[torch.Tensor of dimension 4]
+[torch.DoubleTensor of size 4]
 
 > torch.range(2, 5, 1.2)
  2.0000
  3.2000
  4.4000
-[torch.DoubleTensor of dimension 3]
+[torch.DoubleTensor of size 3]
 ```
 
 
 <a name="torch.randperm"></a>
-### [res] torch.randperm([res,] n) ###
+### [res] torch.randperm([res,] [gen,] n) ###
 <a name="torch.randperm"></a>
 
 `y = torch.randperm(n)` returns a random permutation of integers from 1 to `n`.
 
+`y = torch.randperm(gen, n)` returns a random permutation of integers from 1 to `n`, using a non-global random number generator `gen` created by [torch.Generator()](random.md#torch.Generator).
 
 <a name="torch.reshape"></a>
 ### [res] torch.reshape([res,] x, m [,n...]) ###
@@ -359,6 +362,13 @@ For more than 4 dimensions, you can use a storage: `y = torch.zeros(torch.LongSt
 
 `x:atan()` replaces all elements in-place with the arctangent of the elements of `x`.
 
+<a name="torch.atan2"></a>
+### [res] torch.atan2([res,] x, y) ###
+<a name="torch.atan2"></a>
+
+`y = torch.atan2(x, y)` returns a new `Tensor` with the arctangent of the elements of `x` and `y`.
+
+`x:atan2()` replaces all elements in-place with the arctangent of the elements of `x` and `y`.
 
 <a name="torch.ceil"></a>
 ### [res] torch.ceil([res,] x) ###
@@ -424,19 +434,16 @@ For more than 4 dimensions, you can use a storage: `y = torch.zeros(torch.LongSt
 This function is more accurate than [`log`](#torch.log) for small values of `x`.
 
 
-<a name="x:neg"></a>
+<a name="torch.neg"></a>
 ### x:neg() ###
-<a name="x:neg"></a>
 
 `x:neg()` replaces all elements in-place with the sign-reversed values of the elements of `x`.
 
-
-<a name="x:cinv"></a>
+<a name="torch.cinv"></a>
 ### x:cinv() ###
-<a name="x:cinv"></a>
+<a name="torch.cinv"></a>
 
 `x:cinv()` replaces all elements in-place with `1.0 / x`.
-
 
 <a name="torch.pow"></a>
 ### [res] torch.pow([res,] x, n) ###
@@ -450,6 +457,7 @@ Let `x` be a `Tensor` and `n` a number.
 
 `x:pow(n)` replaces all elements in-place with the elements of `x` to the power of `n`.
 
+`torch.pow(x, n, x)` replaces all elements in-place with `n` to the power of the elements of `x`.
 
 <a name="torch.round"></a>
 ### [res] torch.round([res,] x) ###
@@ -464,9 +472,9 @@ Let `x` be a `Tensor` and `n` a number.
 ### [res] torch.sin([res,] x) ###
 <a name="torch.sin"></a>
 
-`y = torch.sin(x)` returns a new `Tensor` with the sine  of the elements of `x`.
+`y = torch.sin(x)` returns a new `Tensor` with the sine of the elements of `x`.
 
-`x:sin()` replaces all elements in-place with the sine  of the elements of `x`.
+`x:sin()` replaces all elements in-place with the sine of the elements of `x`.
 
 
 <a name="torch.sinh"></a>
@@ -485,6 +493,15 @@ Let `x` be a `Tensor` and `n` a number.
 `y = torch.sqrt(x)` returns a new `Tensor` with the square root of the elements of `x`.
 
 `x:sqrt()` replaces all elements in-place with the square root of the elements of `x`.
+
+
+<a name="torch.rsqrt"></a>
+### [res] torch.rsqrt([res,] x) ###
+<a name="torch.rsqrt"></a>
+
+`y = torch.rsqrt(x)` returns a new `Tensor` with the reciprocal of the square root of the elements of `x`.
+
+`x:rsqrt()` replaces all elements in-place with the reciprocal of the square root of the elements of `x`.
 
 
 <a name="torch.tan"></a>
@@ -514,11 +531,47 @@ Let `x` be a `Tensor` and `n` a number.
 `x:sigmoid()` replaces all elements in-place with the sigmoid of the elements of `x`.
 
 
+<a name="torch.trunc"></a>
+### [res] torch.trunc([res,] x) ###
+<a name="torch.trunc"></a>
+
+`y = torch.trunc(x)` returns a new `Tensor` with the truncated integer values of the elements of `x`.
+
+`x:trunc()` replaces all elements in-place with the truncated integer values of the elements of `x`.
+
+
+<a name="torch.frac"></a>
+### [res] torch.frac([res,] x) ###
+<a name="torch.frac"></a>
+
+`y = torch.frac(x)` returns a new `Tensor` with the fractional portion of the elements of `x`.
+
+`x:frac()` replaces all elements in-place with the fractional portion of the elements of `x`.
+
+
 <a name="torch.basicoperations.dok"></a>
 ## Basic operations ##
 
 In this section, we explain basic mathematical operations for `Tensor`s.
 
+<a name="torch.equal"></a>
+### [boolean] equal([tensor1,] tensor2) ###
+<a name="torch.equal"></a>
+
+Returns `true` iff the dimensions and values of `tensor1` and `tensor2` are exactly the same.
+
+```lua
+x = torch.Tensor{1,2,3}
+y = torch.Tensor{1,2,3}
+> x:equal(y)
+true
+
+y = torch.Tensor{1,2,4}
+> x:equal(y)
+false
+```
+
+Note that `a:equal(b)` is more efficient that `a:eq(b):all()` as it avoids allocation of a temporary tensor and can short-circuit.
 
 <a name="torch.add"></a>
 ### [res] torch.add([res,] tensor, value) ###
@@ -545,7 +598,7 @@ The number of elements must match, but sizes do not matter.
 > x
  5  5
  5  5
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 `y = torch.add(a, b)` returns a new `Tensor`.
@@ -571,7 +624,7 @@ The number of elements must match, but sizes do not matter.
 > x
  8  8
  8  8
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 `x:add(value, y)` multiply-accumulates values of `y` into `x`.
@@ -583,18 +636,17 @@ The number of elements must match, but sizes do not matter.
 `torch.add(z, x, value, y)` puts the result of `x + value * y` in `z`.
 
 
-<a name="x:csub"></a>
+<a name="torch.csub"></a>
 ### tensor:csub(value) ###
-<a name="x:csub"></a>
+<a name="torch.csub"></a>
 
 Subtracts the given value from all elements in the `Tensor`, in place.
 
+<a name="torch.csub"></a>
+### tensor:csub(tensor2) ###
+<a name="torch.csub"></a>
 
-<a name="x:csub"></a>
-### tensor1:csub(tensor2) ###
-<a name="x:csub"></a>
-
-Subtracts `tensor2` from `tensor1`, in place.
+Subtracts `tensor2` from `tensor`, in place.
 The number of elements must match, but sizes do not matter.
 
 ```lua
@@ -604,7 +656,7 @@ The number of elements must match, but sizes do not matter.
 > x
  5  5
  5  5
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 `a:csub(b)` put `a - b` into `a`.
@@ -660,7 +712,7 @@ The number of elements must match, but sizes do not matter.
 > = x
  6  6
  6  6
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 `z = torch.cmul(x, y)` returns a new `Tensor`.
@@ -686,7 +738,7 @@ The number of elements must match, but sizes do not matter.
 > x
  8  8
  8  8
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 `z = torch.cpow(x, y)` returns a new `Tensor`.
@@ -713,7 +765,7 @@ The number of elements must match, but sizes do not matter.
 > x
  32  32
  32  32
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 `z:addcmul(value, x, y)` accumulates the result in `z`.
@@ -735,7 +787,7 @@ Divide all elements in the `Tensor` by the given `value`.
 
 `x:div(2)` will divide all elements of `x` with `2` in-place.
 
-`z:div(x, 2)` with put the result of `x / 2` in `z`.
+`z:div(x, 2)` puts the result of `x / 2` in `z`.
 
 
 <a name="torch.cdiv"></a>
@@ -752,7 +804,7 @@ The number of elements must match, but sizes do not matter.
 > x
  1.0000  0.5000
  0.3333  0.2500
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 `z = torch.cdiv(x, y)` returns a new `Tensor`.
@@ -779,7 +831,7 @@ The number of elements must match, but sizes do not matter.
 > x
  1.4000  1.8000
  2.2000  2.6000
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 `z:addcdiv(value, x, y)` accumulates the result in `z`.
@@ -787,6 +839,127 @@ The number of elements must match, but sizes do not matter.
 `torch.addcdiv(z, value, x, y)` returns a new `Tensor` with the result.
 
 `torch.addcdiv(z, z, value, x, y)` puts the result in `z`.
+
+
+<a name="torch.fmod"></a>
+### [res] torch.fmod([res,] tensor, value) ###
+<a name="torch.fmod"></a>
+
+Computes remainder of division (rounded towards zero) of all elements in the `Tensor` by `value`.
+This works both for integer and floating point numbers. It behaves the same as Lua bulit-in function `math.fmod()` and a little bit different from `torch.remainder()` and `%` operator. For example:
+
+```lua
+> x = torch.Tensor({-3, 3})
+> torch.fmod(x, 2)
+-1
+ 1
+[torch.DoubleTensor of size 2]
+
+> torch.fmod(x, -2)
+-1
+ 1
+[torch.DoubleTensor of size 2]
+
+> torch.remainder(x, 2)
+ 1
+ 1
+[torch.DoubleTensor of size 2]
+
+> torch.remainder(x, -2)
+-1
+-1
+[torch.DoubleTensor of size 2]
+```
+
+`z = torch.fmod(x, 2)` will return a new `Tensor` with the result of `math.fmod(x, 2)`.
+
+`torch.fmod(z, x, 2)` will put the result of `math.fmod(x, 2)` in `z`.
+
+`x:fmod(2)` will replace all elements of `x` the result of `math.fmod(x, 2)` in-place.
+
+`z:fmod(x, 2)` puts the result of `math.fmod(x, 2)` in `z`.
+
+
+<a name="torch.remainder"></a>
+### [res] torch.remainder([res,] tensor, value) ###
+<a name="torch.remainder"></a>
+
+Computes remainder of division (rounded to nearest) of all elements in the `Tensor` by `value`.
+This works both for integer and floating point numbers. It behaves the same as `%` operator and can be expressed as `a % b = a - b * floor(a/b)`. See `torch.fmod()` for comparison.
+
+`z = torch.remainder(x, 2)` will return a new `Tensor` with the result of `x % 2`.
+
+`torch.remainder(z, x, 2)` will put the result of `x % 2` in `z`.
+
+`x:remainder(2)` will replace all elements of `x` the result of `x % 2` in-place.
+
+`z:remainder(x, 2)` puts the result of `x % 2` in `z`.
+
+
+<a name="torch.mod"></a>
+### [res] torch.mod([res,] tensor, value) ###
+<a name="torch.mod"></a>
+
+This function is deprecated and exists only for compatibility with previous versions. Please use `torch.fmod()` or `torch.remainder()` instead.
+
+
+<a name="torch.cfmod"></a>
+### [res] torch.cfmod([res,] tensor1, tensor2) ###
+<a name="torch.cfmod"></a>
+
+Computes the element-wise remainder of the division (rounded towards zero) of `tensor1` by `tensor2`.
+The number of elements must match, but sizes do not matter.
+
+```lua
+> x = torch.Tensor({{3, 3}, {-3, -3}})
+> y = torch.Tensor({{2, -2}, {2, -2}})
+> x:cfmod(y)
+ 1  1
+-1 -1
+[torch.DoubleTensor of size 2x2]
+```
+
+`z = torch.cfmod(x, y)` returns a new `Tensor`.
+
+`torch.cfmod(z, x, y)` puts the result in `z`.
+
+`y:cfmod(x)` replaces all elements of `y` by their remainders of division (rounded towards zero) by
+corresponding elements of `x`.
+
+`z:cfmod(x, y)` puts the result in `z`.
+
+
+<a name="torch.cremainder"></a>
+### [res] torch.cremainder([res,] tensor1, tensor2) ###
+<a name="torch.cremainder"></a>
+
+Computes element-wise remainder of the division (rounded to nearest) of `tensor1` by `tensor2`.
+The number of elements must match, but sizes do not matter.
+
+```lua
+> x = torch.Tensor({{3, 3}, {-3, -3}})
+> y = torch.Tensor({{2, -2}, {2, -2}})
+> x:cfmod(y)
+ 1  1
+-1 -1
+[torch.DoubleTensor of size 2x2]
+```
+
+`z = torch.cremainder(x, y)` returns a new `Tensor`.
+
+`torch.cremainder(z, x, y)` puts the result in `z`.
+
+`y:cremainder(x)` replaces all elements of `y` by their remainders of division (rounded to nearest) by
+corresponding elements of `x`.
+
+`z:cremainder(x, y)` puts the result in `z`.
+
+
+<a name="torch.cmod"></a>
+### [res] torch.cmod([res,] tensor1, tensor2) ###
+<a name="torch.cmod"></a>
+
+This function is deprecated and exists only for compatibility with previous versions. Please use `torch.cfmod()` or `torch.cremainder()` instead.
 
 
 <a name="torch.dot"></a>
@@ -808,20 +981,17 @@ The number of elements must match: both `Tensor`s are seen as a 1D vector.
 
 
 <a name="torch.addmv"></a>
-### [res] torch.addmv([res,] [beta,] [v1,] vec1, [v2,] mat, vec2) ###
+### [res] torch.addmv([res,] [v1,] vec1, [v2,] mat, vec2) ###
 <a name="torch.addmv"></a>
 
 Performs a matrix-vector multiplication between `mat` (2D `Tensor`) and `vec2` (1D `Tensor`) and add it to `vec1`.
 
 Optional values `v1` and `v2` are scalars that multiply `vec1` and `vec2` respectively.
 
-Optional value `beta` is  a scalar that scales the result `Tensor`, before accumulating the result into the `Tensor`.
-Defaults to `1.0`.
-
 In other words,
 
 ```
-res = (beta * res) + (v1 * vec1) + (v2 * (mat * vec2))
+res = (v1 * vec1) + (v2 * (mat * vec2))
 ```
 
 Sizes must respect the matrix-multiplication operation: if `mat` is a `n × m` matrix, `vec2` must be vector of size `m` and `vec1` must be a vector of size `n`.
@@ -835,17 +1005,28 @@ Sizes must respect the matrix-multiplication operation: if `mat` is a `n × m` m
  12
  12
  12
-[torch.Tensor of dimension 3]
+[torch.DoubleTensor of size 3]
 ```
 
 `torch.addmv(x, y, z)` returns a new `Tensor` with the result.
 
 `torch.addmv(r, x, y, z)` puts the result in `r`.
 
-`x:addmv(y, z)` accumulates `y * z` into `x`.
+**Differences when used as a method**
 
-`r:addmv(x, y, z)` puts the result of `x + y * z` into `r`.
+`x:addmv(y, z)` does `x = x + y * z`
 
+`r:addmv(x, y, z)`  does `r = x + y * z` if x is a vector
+
+`r:addmv(s, y, z)`   does `r = r + s * y * z` if `s` is a scalar.
+
+`r:addmv(x, s, y, z)`   does `r = x + s * y * z` if `s` is a scalar and `x` is a vector.
+
+`r:addmv(s1, s2, y, z)`   does `r = s1 * r + s2 * y * z` if `s1` and `s2` are scalars.
+
+The last example does not accurately fit into the function signature, and needs a special mention. It changes the function signature to:
+
+`[vec1] = vec1:addmv([v1,] [v2,] mat, vec2)`
 
 <a name="torch.addr"></a>
 ### [res] torch.addr([res,] [v1,] mat, [v2,] vec1, vec2) ###
@@ -903,20 +1084,17 @@ If `vec1` is a vector of size `n` and `vec2` is a vector of size `m`, then `mat`
 
 
 <a name="torch.addmm"></a>
-### [res] torch.addmm([res,] [beta,] [v1,] M [v2,] mat1, mat2) ###
+### [res] torch.addmm([res,] [v1,] M, [v2,] mat1, mat2) ###
 <a name="torch.addmm"></a>
 
 Performs a matrix-matrix multiplication between `mat1` (2D `Tensor`) and `mat2` (2D `Tensor`).
 
 Optional values `v1` and `v2` are scalars that multiply `M` and `mat1 * mat2` respectively.
 
-Optional value `beta` is  a scalar that scales the result `Tensor`, before accumulating the result into the `Tensor`.
-Defaults to `1.0`.
-
 In other words,
 
 ```
-res = (res * beta) + (v1 * M) + (v2 * mat1 * mat2)
+res = (v1 * M) + (v2 * mat1 * mat2)
 ```
 
 If `mat1` is a `n × m` matrix, `mat2` a `m × p` matrix, `M` must be a `n × p` matrix.
@@ -925,13 +1103,23 @@ If `mat1` is a `n × m` matrix, `mat2` a `m × p` matrix, `M` must be a `n × p`
 
 `torch.addmm(r, M, mat1, mat2)` puts the result in `r`.
 
-`M:addmm(mat1, mat2)` puts the result in `M`.
+**Differences when used as a method**
 
-`r:addmm(M, mat1, mat2)` puts the result in `r`.
+`M:addmm(mat1, mat2)` does `M = M + mat1 * mat2`.
+
+`r:addmm(M, mat1, mat2)`  does `r = M + mat1 * mat2`.
+
+`r:addmm(v1, M, v2, mat1, mat2)` does `r = (v1 * M) + (v2 * mat1 * mat2)`.
+
+`M:addmm(v1, v2, mat1, mat2)` does `M = (v1 * M) + (v2 * mat1 * mat2)`.
+
+The last example does not accurately fit into the function signature, and needs a special mention. It changes the function signature to:
+
+`[M] = M:addmm([v1,] [v2,] mat1, mat2)`
 
 
 <a name="torch.addbmm"></a>
-### [res] torch.addbmm([res,] [v1,] M [v2,] batch1, batch2) ###
+### [res] torch.addbmm([res,] [v1,] M, [v2,] batch1, batch2) ###
 <a name="torch.addbmm"></a>
 
 Batch matrix matrix product of matrices stored in `batch1` and `batch2`, with a reduced add step (all matrix multiplications get accumulated in a single place).
@@ -953,7 +1141,7 @@ res = (v1 * M) + (v2 * sum(batch1_i * batch2_i, i = 1, b))
 
 
 <a name="torch.baddbmm"></a>
-### [res] torch.baddbmm([res,] [v1,] M [v2,] batch1, batch2) ###
+### [res] torch.baddbmm([res,] [v1,] M, [v2,] batch1, batch2) ###
 <a name="torch.baddbmm"></a>
 
 Batch matrix matrix product of matrices stored in `batch1` and `batch2`, with batch add.
@@ -1031,9 +1219,22 @@ If `vec1` is a vector of size `n` and `vec2` is a vector of size `m`, then `res`
 `M:ger(x, y)` puts the result in `M`.
 
 
+<a name="torch.lerp"></a>
+### [res] torch.lerp([res,] a, b, weight) ###
+<a name="torch.lerp"></a>
+
+Linear interpolation of two scalars or tensors based on a weight: `res = a + weight * (b - a)`
+
+`torch.lerp(a, b, weight)` puts the result in a new `Tensor` if `a` and `b` are tensors. If `a` and `b` are scalars the functions returns a number.
+
+`torch.lerp(M, a, b, weight)` puts the result in `M`.
+
+`M:lerp(a, b, weight)` puts the result in `M`.
+
+
 ## Overloaded operators ##
 
-It is possible to use basic mathematical operators like `+`, `-`, `/` and `*` with `Tensor`s.
+It is possible to use basic mathematical operators like `+`, `-`, `/`, `*` and `%` with `Tensor`s.
 These operators are provided as a convenience.
 While they might be handy, they create and return a new `Tensor` containing the results.
 They are thus not as fast as the operations available in the [previous section](#torch.BasicOperations.dok).
@@ -1056,17 +1257,17 @@ The size of the returned `Tensor` will be the size of the first `Tensor`.
 ```lua
 > x = torch.Tensor(2, 2):fill(2)
 > y = torch.Tensor(4):fill(3)
-> x + y
+> = x + y
  5  5
  5  5
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 
-> y - x
+> = y - x
  1
  1
  1
  1
-[torch.Tensor of dimension 4]
+[torch.DoubleTensor of size 4]
 ```
 
 A scalar might also be added or subtracted to a `Tensor`.
@@ -1074,10 +1275,10 @@ The scalar needs to be on the right of the operator.
 
 ```lua
 > x = torch.Tensor(2, 2):fill(2)
-> x + 3
+> = x + 3
  5  5
  5  5
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 
@@ -1087,10 +1288,10 @@ A `Tensor` can be negated with the `-` operator placed in front:
 
 ```lua
 > x = torch.Tensor(2, 2):fill(2)
-> -x
+> = -x
 -2 -2
 -2 -2
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
 
 
@@ -1115,22 +1316,22 @@ Examples:
 > N = torch.Tensor(2, 4):fill(3)
 > x = torch.Tensor(2):fill(4)
 > y = torch.Tensor(2):fill(5)
-> x * y -- dot product
+> = x * y -- dot product
 40
 
-> M * x --- matrix-vector
+> = M * x --- matrix-vector
  16
  16
-[torch.Tensor of dimension 2]
+[torch.DoubleTensor of size 2]
 
-> M * N -- matrix-matrix
+> = M * N -- matrix-matrix
  12  12  12  12
  12  12  12  12
-[torch.Tensor of dimension 2x4]
+[torch.DoubleTensor of size 2x4]
 ```
 
 
-### Division ###
+### Division and Modulo (remainder) ###
 
 Only the division of a `Tensor` by a scalar is supported with the operator `/`.
 
@@ -1138,11 +1339,21 @@ Example:
 
 ```lua
 > x = torch.Tensor(2, 2):fill(2)
-> x/3
+> = x/3
  0.6667  0.6667
  0.6667  0.6667
-[torch.Tensor of dimension 2x2]
+[torch.DoubleTensor of size 2x2]
 ```
+
+Similarly, the remainder of the division of a `Tensor`s elements by a scalar
+can be obtained with the operator `%`.
+
+Example:
+> x = torch.Tensor{{1,2},{3,4}}
+> = x % 3
+ 1  2
+ 0  1
+[torch.Tensor of size 2x2]
 
 
 <a name="torch.columnwise.dok"></a>
@@ -1616,7 +1827,7 @@ Note that many of the operations in [dimension-wise operations](#torch.columnwis
 <a name="torch.renorm"></a>
 ### torch.renorm([res], x, p, dim, maxnorm) ###
 
-Renormalizes the sub-`Tensor`s along dimension `dim` such that they exceed norm `maxnorm`.
+Renormalizes the sub-`Tensor`s along dimension `dim` such that they do not exceed norm `maxnorm`.
 
 `y = torch.renorm(x, p, dim, maxnorm)` returns a version of `x` with `p`-norms lower than `maxnorm` over non-`dim` dimensions.
 The `dim` argument is not to be confused with the argument of the same name in function [`norm`](#torch.norm).
@@ -2152,7 +2363,7 @@ Note: Irrespective of the original strides, the returned matrices `resb` and `re
 
 `A` and `V` are `m × m` matrices and `e` is a `m` dimensional vector.
 
-This function calculates all eigenvalues (and vectors) of `A` such that `A = V' diag(e) V`.
+This function calculates all eigenvalues (and vectors) of `A` such that `A = V diag(e) V'`.
 
 Third argument defines computation of eigenvectors or eigenvalues only.
 If it is `'N'`, only eigenvalues are computed.
@@ -2224,7 +2435,7 @@ Note: Irrespective of the original strides, the returned matrix `V` will be tran
 
 `A` and `V` are `m × m` matrices and `e` is a `m` dimensional vector.
 
-This function calculates all right eigenvalues (and vectors) of `A` such that `A = V' diag(e) V`.
+This function calculates all right eigenvalues (and vectors) of `A` such that `A = V diag(e) V'`.
 
 Third argument defines computation of eigenvectors or eigenvalues only.
 If it is `'N'`, only eigenvalues are computed.
@@ -2496,36 +2707,38 @@ They return a `ByteTensor` in which each element is `0` or `1` indicating if the
 Implements `<` operator comparing each element in `a` with `b` (if `b` is a number) or each element in `a` with corresponding element in `b`.
 
 
-<a name="torch.lt"></a>
+<a name="torch.le"></a>
 ### torch.le(a, b) ###
 
 Implements `<=` operator comparing each element in `a` with `b` (if `b` is a number) or each element in `a` with corresponding element in `b`.
 
 
-<a name="torch.lt"></a>
+<a name="torch.gt"></a>
 ### torch.gt(a, b) ###
 
 Implements `>` operator comparing each element in `a` with `b` (if `b` is a number) or each element in `a` with corresponding element in `b`.
 
 
-<a name="torch.lt"></a>
+<a name="torch.ge"></a>
 ### torch.ge(a, b) ###
 
 Implements `>=` operator comparing each element in `a` with `b` (if `b` is a number) or each element in `a` with corresponding element in `b`.
 
 
-<a name="torch.lt"></a>
+<a name="torch.eq"></a>
 ### torch.eq(a, b) ###
 
 Implements `==` operator comparing each element in `a` with `b` (if `b` is a number) or each element in `a` with corresponding element in `b`.
 
 
-<a name="torch.lt"></a>
+<a name="torch.ne"></a>
 ### torch.ne(a, b) ###
 
 Implements `~=` operator comparing each element in `a` with `b` (if `b` is a number) or each element in `a` with corresponding element in `b`.
 
 
+<a name="torch.all"></a>
+<a name="torch.any"></a>
 ### torch.all(a) ###
 ### torch.any(a) ###
 

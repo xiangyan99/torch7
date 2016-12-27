@@ -4,13 +4,65 @@ require 'torchcwrap'
 
 local interface = wrap.CInterface.new()
 local method = wrap.CInterface.new()
+local argtypes = wrap.CInterface.argtypes
+
+argtypes['ptrdiff_t'] = {
+
+  helpname = function(arg)
+                return 'ptrdiff_t' 
+             end,
+
+  declare = function(arg)
+               -- if it is a number we initialize here
+               local default = tonumber(tostring(arg.default)) or 0
+               return string.format("%s arg%d = %g;", 'ptrdiff_t', arg.i, default)
+            end,
+
+  check = function(arg, idx)
+             return string.format("lua_isnumber(L, %d)", idx)
+          end,
+
+  read = function(arg, idx)
+            return string.format("arg%d = (%s)lua_tonumber(L, %d);", arg.i, 'ptrdiff_t', idx)
+         end,
+
+  init = function(arg)
+            -- otherwise do it here
+            if arg.default then
+               local default = tostring(arg.default)
+               if not tonumber(default) then
+                  return string.format("arg%d = %s;", arg.i, default)
+               end
+            end
+         end,
+  
+  carg = function(arg)
+            return string.format('arg%d', arg.i)
+         end,
+
+  creturn = function(arg)
+               return string.format('arg%d', arg.i)
+            end,
+  
+  precall = function(arg)
+               if arg.returned then
+                  return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
+               end
+            end,
+  
+  postcall = function(arg)
+                if arg.creturned then
+                   return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
+                end
+             end
+}
 
 interface:print([[
 #include "TH.h"
 #include "THMath.h"
 #include "luaT.h"
 #include "utils.h"
-                ]])
+]])
 
 -- specific to torch: we generate a 'dispatch' function
 -- first we create a helper function
@@ -51,6 +103,23 @@ static int torch_isnonemptytable(lua_State *L, int idx)
 }
 ]])
 
+
+interface:print([[
+static const void* torch_istensorarray(lua_State *L, int idx)
+{
+  const char* tname;
+  int tensor_idx;
+  if (!torch_isnonemptytable(L, idx)) return 0;
+
+  lua_checkstack(L, 3);
+  lua_rawgeti(L, idx, 1);
+  tensor_idx = lua_gettop(L);
+  tname = (torch_istensortype(L, luaT_typename(L, -1)));
+  lua_remove(L, tensor_idx);
+  return tname;
+}
+]])
+
 interface.dispatchregistry = {}
 function interface:wrap(name, ...)
    -- usual stuff
@@ -70,6 +139,9 @@ static int torch_NAME(lua_State *L)
   {
   }
   else if(narg >= 2 && (tname = torch_istensortype(L, luaT_typename(L, 2)))) /* second? */
+  {
+  }
+  else if(narg >= 1 && (tname = torch_istensorarray(L, 1))) /* torch table argument? */
   {
   }
   else if(narg >= 1 && lua_type(L, narg) == LUA_TSTRING
@@ -245,6 +317,12 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
          {name=Tensor},
          {name=accreal, creturned=true}})
 
+   wrap("equal",
+        cname("equal"),
+        {{name=Tensor},
+         {name=Tensor},
+         {name="boolean", creturned=true}})
+
    wrap("add",
         cname("add"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
@@ -279,6 +357,25 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
          {name=Tensor, method={default=1}},
          {name=real}})
 
+   wrap("fmod",
+        cname("fmod"),
+        {{name=Tensor, default=true, returned=true, method={default='nil'}},
+         {name=Tensor, method={default=1}},
+         {name=real}})
+
+   wrap("remainder",
+        cname("remainder"),
+        {{name=Tensor, default=true, returned=true, method={default='nil'}},
+         {name=Tensor, method={default=1}},
+         {name=real}})
+
+   -- mod alias
+   wrap("mod",
+        cname("fmod"),
+        {{name=Tensor, default=true, returned=true, method={default='nil'}},
+         {name=Tensor, method={default=1}},
+         {name=real}})
+
    wrap("clamp",
         cname("clamp"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
@@ -309,6 +406,25 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
 
    wrap("cdiv",
         cname("cdiv"),
+        {{name=Tensor, default=true, returned=true, method={default='nil'}},
+         {name=Tensor, method={default=1}},
+         {name=Tensor}})
+
+   wrap("cfmod",
+        cname("cfmod"),
+        {{name=Tensor, default=true, returned=true, method={default='nil'}},
+         {name=Tensor, method={default=1}},
+         {name=Tensor}})
+
+   wrap("cremainder",
+        cname("cremainder"),
+        {{name=Tensor, default=true, returned=true, method={default='nil'}},
+         {name=Tensor, method={default=1}},
+         {name=Tensor}})
+
+   -- cmod alias
+   wrap("cmod",
+        cname("cfmod"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
          {name=Tensor, method={default=1}},
          {name=Tensor}})
@@ -469,7 +585,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    wrap("numel",
         cname("numel"),
         {{name=Tensor},
-         {name="long", creturned=true}})
+         {name="ptrdiff_t", creturned=true}})
 
    for _,name in ipairs({"cumsum", "cumprod"}) do
       wrap(name,
@@ -588,7 +704,7 @@ wrap("topk",
         {{name=Tensor, default=true, returned=true},
          {name="IndexTensor", default=true, returned=true, noreadadd=true},
          {name=Tensor},
-         {name="index"},
+         {name="long"},
          {name="index", default=lastdim(3)}})
 
    wrap("mode",
@@ -686,19 +802,33 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
         {{name=Tensor, returned=true},
          {name='Generator', default=true}})
 
-   for _,f in ipairs({{name='geometric'},
-                      {name='bernoulli', a=0.5}}) do
+   wrap("geometric",
+     "THRandom_geometric",
+     {{name="Generator", default=true},
+      {name="double"},
+      {name="double", creturned=true}},
+     cname("geometric"),
+     {{name=Tensor, returned=true},
+      {name="Generator", default=true},
+      {name="double"}})
 
-      wrap(f.name,
-           string.format("THRandom_%s", f.name),
-           {{name='Generator', default=true},
-            {name="double", default=f.a},
-            {name="double", creturned=true}},
-           cname(f.name),
-           {{name=Tensor, returned=true},
-            {name='Generator', default=true},
-            {name="double", default=f.a}})
-   end
+   wrap("bernoulli",
+      "THRandom_bernoulli",
+      {{name="Generator", default=true},
+       {name="double", default=0.5},
+       {name="double", creturned=true}},
+      cname("bernoulli"),
+      {{name=Tensor, returned=true},
+       {name="Generator", default=true},
+       {name="double", default=0.5}},
+      cname("bernoulli_FloatTensor"),
+      {{name=Tensor, returned=true},
+       {name="Generator", default=true},
+       {name="FloatTensor"}},
+      cname("bernoulli_DoubleTensor"),
+      {{name=Tensor, returned=true},
+       {name="Generator", default=true},
+       {name="DoubleTensor"}})
 
    wrap("squeeze",
         cname("squeeze"),
@@ -1003,9 +1133,8 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
                             "cos", "acos", "cosh",
                             "sin", "asin", "sinh",
                             "tan", "atan", "tanh",
-                            "sqrt",
-                            "round", "ceil", "floor"}) do
-                            --"abs"}) do
+                            "sqrt", "round", "ceil",
+                            "floor", "trunc", }) do
          wrap(name,
               cname(name),
               {{name=Tensor, default=true, returned=true, method={default='nil'}},
@@ -1015,13 +1144,29 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
                {name=real, creturned=true}})
       end
 
-         wrap("abs",
-              cname("abs"),
-              {{name=Tensor, default=true, returned=true, method={default='nil'}},
-               {name=Tensor, method={default=1}}},
-              "fabs",
-              {{name=real},
-               {name=real, creturned=true}})
+      wrap("abs",
+           cname("abs"),
+           {{name=Tensor, default=true, returned=true, method={default='nil'}},
+            {name=Tensor, method={default=1}}},
+           "fabs",
+           {{name=real},
+            {name=real, creturned=true}})
+
+      wrap("frac",
+           cname("frac"),
+           {{name=Tensor, default=true, returned=true, method={default='nil'}},
+            {name=Tensor, method={default=1}}},
+           "TH_frac",
+           {{name=real},
+            {name=real, creturned=true}})
+
+      wrap("rsqrt",
+           cname("rsqrt"),
+           {{name=Tensor, default=true, returned=true, method={default='nil'}},
+            {name=Tensor, method={default=1}}},
+           "TH_rsqrt",
+           {{name=real},
+            {name=real, creturned=true}})
 
       wrap("sigmoid",
            cname("sigmoid"),
@@ -1041,6 +1186,18 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
            {{name=Tensor, default=true, returned=true, method={default='nil'}},
             {name=Tensor, method={default=1}}})
 
+      wrap("lerp",
+           cname("lerp"),
+           {{name=Tensor, default=true, returned=true, method={default='nil'}},
+            {name=Tensor, method={default=1}},
+            {name=Tensor},
+            {name=real}},
+           "TH_lerp",
+           {{name=real},
+            {name=real},
+            {name=real},
+            {name=real, creturned=true}})
+
       wrap("atan2",
            cname("atan2"),
            {{name=Tensor, default=true, returned=true, method={default='nil'}},
@@ -1049,8 +1206,7 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
            "atan2",
            {{name=real},
             {name=real},
-            {name=real, creturned=true}}
-            )
+            {name=real, creturned=true}})
 
       wrap("pow",
            cname("pow"),
